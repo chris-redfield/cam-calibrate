@@ -46,20 +46,30 @@ while(True):
         break
 
 
-print("Calibrando...")
+print("Calibrando...", end='\n\n')
+
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
+rotation_mat = np.zeros(shape=(3, 3))
+R = cv2.Rodrigues(rvecs[0], rotation_mat)[0]
+P = np.column_stack((np.matmul(mtx,R), tvecs[0]))
+
+print("Matriz de projeção P:")
+print(P, end='\n\n')
+
 print("matriz de intrínsecos (K):")
-print(mtx)
+print(mtx, end='\n\n')
 
-print("Vetores de Rotação:")
-print(rvecs[:2])
+# print("Vetores de Rotação:")
+# print(rvecs[:2])
+print("Matriz de Rotação:")
+print(R, end='\n\n')
 
-print("Vetores de translação:")
-print(tvecs[:2])
+print("Vetor de translação:")
+print(np.array(tvecs).flatten(), end='\n\n')
 
 print("Parâmetros de distorção: [k1, k2, p1, p2, k3]")
-print(dist)
+print(dist, end='\n\n')
 
 print(f"RMSE de projeção: {ret}")
 
