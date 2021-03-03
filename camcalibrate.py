@@ -16,10 +16,6 @@ imgpoints = [] # pontos 2d no plano da imagem
 # Captura o video
 vid = cv2.VideoCapture(0) 
 
-# Estados do app para controle
-state = 0
-calibrated = False
-
 while(True): 
       
     # Captura cada frame do video
@@ -45,35 +41,27 @@ while(True):
     # Mostra o frame atual, pode ou não estar com as bordas coloridas
     cv2.imshow('frame', frame) 
 
-    # Caso o estado seja satisfeito, e a calibração ainda não tenha sido feita:
-    # calibra a câmera e printa os parâmetros de calibração
-    if(len(objpoints)>5 and state==1 and calibrated == False):
-        print("Calibrando...")
-        ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-
-        print(f"erro de projeção RMS: {ret}")
-        
-        print("matriz de intrínsecos (K):")
-        print(mtx)
-
-        print("Vetores de Rotação:")
-        print(rvecs[:2])
-
-        print("Vetores de translação:")
-        print(tvecs[:2])
-
-        print("Parâmetros de distorção: [k1, k2, p1, p2, k3]")
-        print(dist)
-        calibrated = True
-
     # Botão q para iniciar a calibração e depois sair do programa
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        if state==1:
-            break
+        break
 
-        if state==0:
-            print("Tentando calibrar...")
-            state+=1
+
+print("Calibrando...")
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+
+print("matriz de intrínsecos (K):")
+print(mtx)
+
+print("Vetores de Rotação:")
+print(rvecs[:2])
+
+print("Vetores de translação:")
+print(tvecs[:2])
+
+print("Parâmetros de distorção: [k1, k2, p1, p2, k3]")
+print(dist)
+
+print(f"RMSE de projeção: {ret}")
 
 # Solta o objeto de captura
 vid.release() 
