@@ -1,31 +1,40 @@
 import cv2 
 import numpy as np
 
-# termination criteria
+# Criterios de interrupção do otimizador
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)  
 
+# Cria pontos
 objp = np.zeros((6*7,3), np.float32)
 objp[:,:2] = np.mgrid[0:7,0:6].T.reshape(-1,2)
 
-# Arrays to store object points and image points from all the images.
-objpoints = [] # 3d point in real world space
-imgpoints = [] # 2d points in image plane.
+# Arrays para armazenar os pontos 3d e 2d de todas as imagens
+objpoints = [] # pontos 3d no espaço do mundo real
+imgpoints = [] # pontos 2d no plano da imagem
 
 
-# define a video capture object 
+# Captura o video
 vid = cv2.VideoCapture(0) 
+
+# Estados do app para controle
 state = 0
 calibrated = False
 
 while(True): 
       
-    # Capture the video frame by frame 
+    # Captura cada frame do video
     ret, frame = vid.read() 
 
+    # transforma em cinza para facilitar a busca pelo  padrão
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+    # usa o opencv para recuperar as bordas do xadrez
     ret, corners = cv2.findChessboardCorners(gray, (7,6), None)
 
+    # Caso ele encontre:
+    # 1. cria os 'desenhos' para mostrar as bordas encontradas
+    # 2. Insere esses desenhos no frame atual
+    # 3. adiciona os pontos mapeados aos arrays
     if ret == True:
         corners2 = cv2.cornerSubPix(gray,corners, (11,11), (-1,-1), criteria)
         cv2.drawChessboardCorners(frame, (7,6), corners2, True)
@@ -33,11 +42,15 @@ while(True):
         objpoints.append(objp)
         imgpoints.append(corners)
 
+    # Mostra o frame atual, pode ou não estar com as bordas coloridas
     cv2.imshow('frame', frame) 
 
+    # Caso o estado seja satisfeito, e a calibração ainda não tenha sido feita:
+    # calibra a câmera e printa os parâmetros de calibração
     if(len(objpoints)>5 and state==1 and calibrated == False):
         print("Calibrando...")
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+
         print(f"erro de projeção RMS: {ret}")
         
         print("matriz de intrínsecos (K):")
@@ -53,7 +66,7 @@ while(True):
         print(dist)
         calibrated = True
 
-    # 'q' button is set for interaction
+    # Botão q para iniciar a calibração e depois sair do programa
     if cv2.waitKey(1) & 0xFF == ord('q'):
         if state==1:
             break
@@ -61,10 +74,9 @@ while(True):
         if state==0:
             print("Tentando calibrar...")
             state+=1
-        
 
-
-# After the loop release the cap object 
+# Solta o objeto de captura
 vid.release() 
-# Destroy all the windows 
+
+# Destroi as janelas
 cv2.destroyAllWindows() 
