@@ -28,7 +28,7 @@ while(True):
     ret, corners = cv2.findChessboardCorners(gray, (7,6), None)
 
     # Caso ele encontre:
-    # 1. cria os 'desenhos' para mostrar as bordas encontradas
+    # 1. Refina as bordas e cria os 'desenhos' para mostrar as bordas encontradas
     # 2. Insere esses desenhos no frame atual
     # 3. adiciona os pontos mapeados aos arrays
     if ret == True:
